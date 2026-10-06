@@ -27,6 +27,11 @@ MYSQL_USER = os.environ.get("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
 MYSQL_DB = os.environ.get("MYSQL_DB", "broadband_db")
 
+MYSQL_SSL_CA = os.environ.get(
+    "MYSQL_SSL_CA",
+    os.path.join(os.path.dirname(__file__), "certs", "aiven-ca.pem")
+)
+
 # Email SMTP Configuration (Gmail Sender / Admin Account)
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
@@ -282,7 +287,8 @@ def get_server_connection():
             user=MYSQL_USER,
             password=MYSQL_PASSWORD,
             autocommit=True,
-            charset='utf8mb4'
+            charset="utf8mb4",
+            ssl={"ca": MYSQL_SSL_CA}
         )
     except pymysql.Error as e:
         print_connection_help(e)
@@ -300,7 +306,8 @@ def get_db():
                 database=MYSQL_DB,
                 cursorclass=pymysql.cursors.DictCursor,
                 autocommit=True,
-                charset='utf8mb4'
+                charset='utf8mb4',
+                ssl={"ca": MYSQL_SSL_CA}
             )
             g.db = MySQLDatabaseWrapper(conn)
         except pymysql.Error as e:
@@ -320,11 +327,6 @@ def init_db():
     """Create MySQL database and tables IF NOT EXISTS. Seed demo data ONLY if database is empty."""
     print(f"Connecting to MySQL server at '{MYSQL_HOST}:{MYSQL_PORT}' as user '{MYSQL_USER}'...")
     
-    server_conn = get_server_connection()
-    with server_conn.cursor() as cur:
-        cur.execute(f"CREATE DATABASE IF NOT EXISTS `{MYSQL_DB}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
-    server_conn.close()
-
     db_conn = pymysql.connect(
         host=MYSQL_HOST,
         port=MYSQL_PORT,
@@ -333,7 +335,8 @@ def init_db():
         database=MYSQL_DB,
         cursorclass=pymysql.cursors.DictCursor,
         autocommit=True,
-        charset='utf8mb4'
+        charset='utf8mb4',
+        ssl={"ca": MYSQL_SSL_CA}
     )
     db = MySQLDatabaseWrapper(db_conn)
 
