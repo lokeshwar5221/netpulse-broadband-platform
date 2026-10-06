@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Register — NetPulse Broadband{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card-pulse mt-3">
+            <span class="tag">New Connection Registration</span>
+            <h4 class="mt-2 mb-3">Create Your NetPulse Account</h4>
+
+            {% if errors %}
+            <div class="alert alert-danger p-3 mb-3 border-0 shadow-sm" style="border-radius: 10px; background-color: #fef2f2; color: #991b1b;">
+                <h6 class="fw-bold mb-2">⚠️ Account Registration Notice:</h6>
+                <ul class="mb-2 ps-3">
+                    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+                </ul>
+                <div class="mt-2 pt-2 border-top border-danger border-opacity-25 small">
+                    Already registered? <a href="{{ url_for('login') }}" class="fw-bold text-danger">Sign in to your account &rarr;</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Full Name (Letters Only)</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" value="{{ form.get('name', '') }}" pattern="[A-Za-z\s.'-]{2,}" title="Full Name must contain letters and spaces only (no numbers)." required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Connection ID (Unique)</label>
+                        <input type="text" name="connection_id" class="form-control" placeholder="Auto-generated" value="{{ form.get('connection_id', next_cid) }}" required>
+                        <div class="form-text small text-muted">Auto-suggested unique ID (e.g. {{ next_cid }})</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Email Address (for receipts &amp; 7-day renewal alerts)</label>
+                        <input type="email" name="email" class="form-control" placeholder="e.g. customer@gmail.com" value="{{ form.get('email', '') }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Installation Address</label>
+                        <input type="text" name="address" class="form-control" placeholder="e.g. Flat 301, Lakeview Towers" value="{{ form.get('address', '') }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Choose Broadband Plan</label>
+                        <select name="plan_id" class="form-select" required>
+                            <option value="" disabled selected>Select a plan</option>
+                            {% for p in plans %}
+                            <option value="{{ p['id'] }}" {% if form.get('plan_id')|string == p['id']|string %}selected{% endif %}>
+                                {{ p['name'] }} — {{ p['speed'] }}, {{ p['data_limit'] }} — ₹{{ p['price'] }}/month
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Choose Username (Unique)</label>
+                        <input type="text" name="username" class="form-control" placeholder="e.g. rahul123" value="{{ form.get('username', '') }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Choose Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="At least 4 characters" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-signal w-100 mt-4 py-2 fs-6">Create Account &amp; Proceed to Payment</button>
+            </form>
+
+            <p class="text-center small text-muted mt-3 mb-0">
+                Already registered with NetPulse? <a href="{{ url_for('login') }}" class="fw-semibold">Sign in here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

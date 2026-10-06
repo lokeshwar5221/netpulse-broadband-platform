@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Sign in — NetPulse{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card-pulse mt-4">
+            <span class="tag">Sign in</span>
+            <h4 class="mt-2 mb-3">Welcome to NetPulse</h4>
+
+            {% if error %}
+            <div class="alert alert-danger py-2">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Username or Email Address</label>
+                    <input type="text" name="username_or_email" class="form-control" placeholder="Enter your username or email" value="{{ form_input if form_input else '' }}" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-signal w-100">Sign in</button>
+            </form>
+
+            <p class="text-center small text-muted mt-3 mb-0">
+                New here? <a href="{{ url_for('register') }}">Create an account</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

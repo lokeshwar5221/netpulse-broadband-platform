@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}NetPulse — Broadband Platform{% endblock %}
+{% block content %}
+<div class="hero">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <h1 class="mb-3">NetPulse Revenue &amp; Subscription Intelligence</h1>
+            <p class="mb-4">Empowering broadband operations with automated customer management, usage-based recommendations, and real-time revenue analytics.</p>
+            {% if not current_user.role %}
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('login') }}" class="btn btn-signal btn-lg">Sign In to Portal</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg">Create Account</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{{ url_for('customer_view', customer_id=1) }}" class="role-card">
+            <span class="tag">Customer View</span>
+            <h4 class="mt-2 mb-2">Customer Portal</h4>
+            <p class="text-muted small mb-0">View subscription details, data usage, upgrade/downgrade suggestions, and pay/renew online.</p>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('expiry_list') }}" class="role-card">
+            <span class="tag">Staff View</span>
+            <h4 class="mt-2 mb-2">Follow-up Queue</h4>
+            <p class="text-muted small mb-0">Track connections expiring in the next 7 days, dispatch email alerts, and log customer interactions.</p>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="role-card">
+            <span class="tag">Admin View</span>
+            <h4 class="mt-2 mb-2">Executive Dashboard</h4>
+            <p class="text-muted small mb-0">Monitor total revenue, subscriber distribution, payment recovery rate, and usage intelligence.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

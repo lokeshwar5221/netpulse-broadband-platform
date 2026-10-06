@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Follow-up Queue — NetPulse{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="section-title mb-1">Customers nearing expiry (next 7 days)</h3>
+        <p class="text-muted mb-0">Staff can send renewal email notifications and mark follow-ups here.</p>
+    </div>
+    <form method="POST" action="{{ url_for('send_all_renewal_alerts') }}">
+        <button class="btn btn-signal btn-sm">📧 Send 7-Day Email Alerts to All</button>
+    </form>
+</div>
+
+{% if success_msg %}
+<div class="alert alert-success py-2 mb-3">
+    {{ success_msg }}
+</div>
+{% endif %}
+
+<div class="card-pulse">
+    <table class="table table-pulse align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Customer</th><th>Connection ID</th><th>Plan</th><th>Due Date</th><th>Days Left</th><th>Status</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in customers %}
+            <tr>
+                <td>{{ c['name'] }}</td>
+                <td>{{ c['connection_id'] }}</td>
+                <td>{{ c['plan_name'] }}</td>
+                <td>{{ c['due_date'] }}</td>
+                <td><span class="badge bg-warning text-dark">{{ c['days_left'] }} days</span></td>
+                <td>
+                    {% if c['followed_up'] %}
+                        <span class="badge-success-pulse">Followed up &amp; Emailed</span>
+                    {% else %}
+                        <span class="badge-warn-pulse">Pending Notice</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="{{ url_for('followup', customer_id=c['id']) }}">
+                            <button class="btn btn-sm btn-signal">
+                                {% if c['followed_up'] %}Resend Notice{% else %}Send Notice &amp; Mark Followed Up{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted py-4">No customers nearing expiry right now.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

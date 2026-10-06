@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Customer Directory — NetPulse{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="section-title mb-1">Customer Directory &amp; Lookup</h3>
+        <p class="text-muted mb-0">Search and select any registered connection to view account details or process payments.</p>
+    </div>
+    <div class="col-md-4">
+        <input type="text" id="customerSearch" class="form-control" placeholder="🔍 Search by name, Connection ID, or email..." onkeyup="filterCustomers()">
+    </div>
+</div>
+
+<div class="row g-3" id="customerGrid">
+    {% for c in customers %}
+    <div class="col-md-4 customer-item" data-search="{{ c['name']|lower }} {{ c['connection_id']|lower }} {{ c['email']|lower }}">
+        <a href="{{ url_for('customer_view', customer_id=c['id']) }}" class="role-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="tag mb-0">{{ c['connection_id'] }}</span>
+                <span class="badge-success-pulse">{{ c['plan_name'] }}</span>
+            </div>
+            <h5 class="mt-2 mb-1 fw-bold">{{ c['name'] }}</h5>
+            <p class="text-muted small mb-0">{{ c['email'] }}</p>
+        </a>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5 text-muted">No registered customers found.</div>
+    {% endfor %}
+</div>
+
+<script>
+function filterCustomers() {
+    const input = document.getElementById('customerSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.customer-item');
+    items.forEach(item => {
+        const text = item.getAttribute('data-search');
+        item.style.display = text.includes(input) ? 'block' : 'none';
+    });
+}
+</script>
+{% endblock %}

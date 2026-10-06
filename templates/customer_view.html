@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}{{ customer['name'] }} — NetPulse{% endblock %}
+{% block content %}
+
+{% set current_plan_id = target_plan['id'] if target_plan else customer['plan_id'] %}
+{% set active_plan_name = target_plan['name'] if target_plan else customer['plan_name'] %}
+{% set active_plan_price = target_plan['price'] if target_plan else customer['price'] %}
+{% set active_plan_validity = target_plan['validity_days'] if target_plan else customer['validity_days'] %}
+{% set active_plan_speed = target_plan['speed'] if target_plan else customer['speed'] %}
+{% set active_plan_data = target_plan['data_limit'] if target_plan else customer['data_limit'] %}
+
+{% if show_payment or target_plan %}
+<!-- Auto-trigger Payment Popup Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.25);">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0F3443 0%, #0EA5E9 100%); border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    {% if target_plan %}🔄 Confirm Plan Switch &amp; Recharge{% else %}🎉 Complete Plan Activation{% endif %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-3">
+                    {% if target_plan %}
+                        Switching connection <strong>{{ customer['connection_id'] }}</strong> to <strong>{{ target_plan['name'] }}</strong>. Complete payment below to activate.
+                    {% else %}
+                        Welcome <strong>{{ customer['name'] }}</strong>! Account for connection <strong>{{ customer['connection_id'] }}</strong> is ready for payment.
+                    {% endif %}
+                </p>
+
+                <div class="p-3 mb-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Selected Plan:</span>
+                        <strong>{{ active_plan_name }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Speed &amp; Limit:</span>
+                        <span>{{ active_plan_speed }} ({{ active_plan_data }})</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Validity Extension:</span>
+                        <span class="text-primary fw-bold">+{{ active_plan_validity }} Days</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                        <span class="text-muted">Amount Payable:</span>
+                        <strong style="color: #0EA5E9; font-size: 1.25rem;">₹{{ active_plan_price }}</strong>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('recharge', customer_id=customer['id']) }}">
+                    <input type="hidden" name="plan_id" value="{{ current_plan_id }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Payment Mode</label>
+                        <select name="payment_mode" class="form-select">
+                            <option value="UPI" selected>UPI (Instant)</option>
+                            <option value="Card">Credit / Debit Card</option>
+                            <option value="Net Banking">Net Banking</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="simulate_fail" id="modal_simulate_fail">
+                        <label class="form-check-label small text-muted" for="modal_simulate_fail">
+                            Simulate a failed payment (for demo)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-signal w-100 py-2 fs-6">Pay ₹{{ active_plan_price }} &amp; {% if target_plan %}Switch to {{ target_plan['name'] }}{% else %}Activate Plan (+{{ active_plan_validity }}d){% endif %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var modalElem = document.getElementById('paymentModal');
+        if (modalElem) {
+            var pModal = new bootstrap.Modal(modalElem);
+            pModal.show();
+        }
+    });
+</script>
+
+{% if target_plan %}
+<div class="alert alert-info d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-0" style="background-color: #e0f2fe; color: #0369a1; border-radius: 10px;">
+    <div>
+        <h5 class="alert-heading mb-1">🔄 Switching to {{ target_plan['name'] }}</h5>
+        <p class="mb-0">You have selected <strong>{{ target_plan['name'] }}</strong> (₹{{ target_plan['price'] }}). Complete payment to activate this new plan.</p>
+    </div>
+    <button type="button" class="btn btn-sm btn-signal ms-3" onclick="new bootstrap.Modal(document.getElementById('paymentModal')).show();">Pay &amp; Switch Now</button>
+</div>
+{% else %}
+<div class="alert alert-success d-flex align-items-center justify-content-between p-3 mb-4 shadow-sm border-0" style="background-color: #d1fae5; color: #065f46; border-radius: 10px;">
+    <div>
+        <h5 class="alert-heading mb-1">🎉 Registration Successful!</h5>
+        <p class="mb-0">Connection <strong>{{ customer['connection_id'] }}</strong> registered. Please complete payment to activate your plan.</p>
+    </div>
+    <button type="button" class="btn btn-sm btn-signal ms-3" onclick="new bootstrap.Modal(document.getElementById('paymentModal')).show();">Open Payment Popup</button>
+</div>
+{% endif %}
+
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="section-title mb-0">{{ customer['name'] }}</h3>
+        <p class="text-muted mb-0">{{ customer['connection_id'] }} · {{ customer['address'] }} · {{ customer['email'] }}</p>
+    </div>
+    {% if days_left <= 7 %}
+        <span class="badge-warn-pulse">Renewal Due in {{ days_left }} day{{ 's' if days_left != 1 else '' }}</span>
+    {% else %}
+        <span class="badge-success-pulse">Active · {{ days_left }} days left</span>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card-pulse mb-4">
+            <span class="tag">Current plan</span>
+            <h4 class="mt-2">{{ customer['plan_name'] }}</h4>
+            <div class="row text-muted small mt-3">
+                <div class="col-6 mb-2"><strong>Speed:</strong> {{ customer['speed'] }}</div>
+                <div class="col-6 mb-2"><strong>Data:</strong> {{ customer['data_limit'] }}</div>
+                <div class="col-6 mb-2"><strong>Price:</strong> ₹{{ customer['price'] }}</div>
+                <div class="col-6 mb-2"><strong>Valid Until:</strong> {{ customer['due_date'] }}</div>
+            </div>
+        </div>
+
+        {% if days_left <= 7 or show_payment or target_plan %}
+        <!-- Active Payment / Renewal Box (Shown when due in <=7 days, new registration, or switching plan) -->
+        <div class="card-pulse border-highlight" id="payment-section" style="border: 2px solid #0EA5E9; background-color: #f0f9ff;">
+            <span class="tag" style="background-color: #0EA5E9; color: #fff;">
+                {% if target_plan %}Pay &amp; Activate New Plan{% elif show_payment %}Complete Initial Payment{% else %}Renewal Due (Pay to Extend +{{ active_plan_validity }} Days){% endif %}
+            </span>
+            <h5 class="mt-2">Pay ₹{{ active_plan_price }}</h5>
+            <p class="text-muted small">
+                {% if target_plan %}
+                    Complete payment for <strong>{{ target_plan['name'] }}</strong> to switch your active subscription.
+                {% else %}
+                    Recharging will automatically add <strong>+{{ customer['validity_days'] }} days</strong> to your plan validity.
+                {% endif %}
+            </p>
+
+            <form method="POST" action="{{ url_for('recharge', customer_id=customer['id']) }}" class="mt-3">
+                <input type="hidden" name="plan_id" value="{{ current_plan_id }}">
+                <div class="mb-3">
+                    <label class="form-label">Payment mode</label>
+                    <select name="payment_mode" class="form-select">
+                        <option value="UPI" selected>UPI Instant</option>
+                        <option value="Card">Credit / Debit Card</option>
+                        <option value="Net Banking">Net Banking</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="simulate_fail" id="simulate_fail">
+                    <label class="form-check-label small text-muted" for="simulate_fail">
+                        Simulate a failed payment (for demo)
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-signal w-100 py-2">
+                    Pay ₹{{ active_plan_price }} &amp; {% if target_plan %}Switch to {{ target_plan['name'] }}{% else %}Add {{ active_plan_validity }} Days{% endif %}
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <!-- Active Status Card (When plan is active > 7 days) -->
+        <div class="card-pulse" id="active-status-card">
+            <span class="tag" style="background-color: #D1FAE5; color: #065F46;">Subscription Active</span>
+            <h5 class="mt-2 text-success">Service is Active</h5>
+            <p class="text-muted small mb-3">Your plan is active with <strong>{{ days_left }} days remaining</strong>. Next billing cycle is on <strong>{{ customer['due_date'] }}</strong>.</p>
+            
+            <button class="btn btn-outline-secondary btn-sm w-100" type="button" data-bs-toggle="collapse" data-bs-target="#earlyRechargeCollapse" aria-expanded="false" aria-controls="earlyRechargeCollapse">
+                ⚙️ Prepay / Extend Subscription Early (+{{ customer['validity_days'] }} Days)
+            </button>
+
+            <div class="collapse mt-3" id="earlyRechargeCollapse">
+                <div class="p-3 border rounded" style="background-color: #F8FAFC;">
+                    <h6 class="mb-2">Early Renewal (+{{ customer['validity_days'] }} Days)</h6>
+                    <form method="POST" action="{{ url_for('recharge', customer_id=customer['id']) }}">
+                        <input type="hidden" name="plan_id" value="{{ customer['plan_id'] }}">
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Payment Mode</label>
+                            <select name="payment_mode" class="form-select form-select-sm">
+                                <option value="UPI" selected>UPI Instant</option>
+                                <option value="Card">Credit / Debit Card</option>
+                                <option value="Net Banking">Net Banking</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-signal btn-sm w-100 mt-2">Pay ₹{{ customer['price'] }} &amp; Add {{ customer['validity_days'] }} Days</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card-pulse mb-4">
+            <span class="tag">Your data usage</span>
+            <div class="row text-muted small mt-3 mb-2">
+                <div class="col-6 mb-2"><strong>Recent usage:</strong> {{ usage_info['usage_gb'] }} GB</div>
+                <div class="col-6 mb-2"><strong>Plan reference limit:</strong> {{ usage_info['limit_gb'] }} GB</div>
+                <div class="col-6 mb-2"><strong>Usage:</strong> {{ usage_info['ratio_pct'] }}% of plan</div>
+                <div class="col-6 mb-2">
+                    <strong>Status:</strong>
+                    {% if usage_info['recommendation'] == 'Upgrade' %}
+                        <span class="badge-warn-pulse">Upgrade suggested</span>
+                    {% elif usage_info['recommendation'] == 'Downgrade' %}
+                        <span class="badge-fail-pulse">Downgrade suggested</span>
+                    {% else %}
+                        <span class="badge-success-pulse">Right-sized</span>
+                    {% endif %}
+                </div>
+            </div>
+            <p class="text-muted small mb-3">{{ usage_info['reason'] }}</p>
+
+            <form method="POST" action="{{ url_for('change_plan', customer_id=customer['id']) }}" class="row g-2 align-items-end">
+                <div class="col-sm-8">
+                    <label class="form-label small mb-1">Select New Plan to Switch</label>
+                    <select name="plan_id" class="form-select">
+                        {% for p in all_plans %}
+                        <option value="{{ p['id'] }}" {% if p['id'] == customer['plan_id'] %}selected{% endif %}>
+                            {{ p['name'] }} — {{ p['speed'] }}, {{ p['data_limit'] }}, ₹{{ p['price'] }}/{{ p['validity_days'] }}d
+                            {% if usage_info['suggested_plan'] and p['id'] == usage_info['suggested_plan']['id'] %} (suggested){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-4">
+                    <button type="submit" class="btn btn-signal w-100">Switch Plan &amp; Pay</button>
+                </div>
+            </form>
+            <p class="text-muted small mt-2 mb-0">Note: Plan switching takes effect when you complete recharge payment for the selected plan.</p>
+        </div>
+
+        <div class="card-pulse">
+            <span class="tag">Billing history</span>
+            <table class="table table-pulse mt-3 align-middle">
+                <thead>
+                    <tr><th>Date</th><th>Mode</th><th>Amount</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t['date'] }}</td>
+                        <td>{{ t['payment_mode'] }}</td>
+                        <td>₹{{ t['amount'] }}</td>
+                        <td>
+                            {% if t['status'] == 'Success' %}
+                                <span class="badge-success-pulse">Success</span>
+                            {% else %}
+                                <span class="badge-fail-pulse">Failed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-3">No payments recorded yet. Complete payment above to activate!</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

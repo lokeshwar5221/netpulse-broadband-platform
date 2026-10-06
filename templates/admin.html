@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+{% block title %}Executive Analytics — NetPulse{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="section-title mb-1">Revenue &amp; Renewal Intelligence</h3>
+        <p class="text-muted mb-0">Real-time overview of business metrics, staff management, and plan recommendations.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-signal" data-bs-toggle="modal" data-bs-target="#addPlanModal">
+            ➕ Add New Broadband Plan
+        </button>
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+            👤 Add New Staff Member
+        </button>
+    </div>
+</div>
+
+<!-- Modal: Add New Plan -->
+<div class="modal fade" id="addPlanModal" tabindex="-1" aria-labelledby="addPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.25);">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 100%); border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="addPlanModalLabel">➕ Create New Broadband Plan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_plan') }}">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Plan Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Ultra Gaming 500" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Speed</label>
+                            <input type="text" name="speed" class="form-control" placeholder="e.g. 500 Mbps" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Data Limit Label</label>
+                            <input type="text" name="data_limit" class="form-control" placeholder="e.g. 2000 GB or Unlimited" required>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Limit (GB)</label>
+                            <input type="number" step="1" name="data_limit_gb" class="form-control" value="2000" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Validity (Days)</label>
+                            <input type="number" step="1" name="validity_days" class="form-control" value="30" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Price (₹)</label>
+                            <input type="number" step="0.1" name="price" class="form-control" placeholder="1499" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-signal">Create Plan Permanently</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add New Staff -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.25);">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0F172A 0%, #10B981 100%); border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="addStaffModalLabel">👤 Add New Staff Member / Admin</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_staff') }}">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Full Name</label>
+                        <input type="text" name="display_name" class="form-control" placeholder="e.g. Suresh Patel" pattern="[A-Za-z\s.'-]{2,}" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Username</label>
+                            <input type="text" name="username" class="form-control" placeholder="e.g. suresh_staff" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Role</label>
+                            <select name="role" class="form-select" required>
+                                <option value="staff" selected>Support Staff</option>
+                                <option value="admin">Business Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="e.g. suresh@netpulse.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="At least 4 characters" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Create Staff Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4" id="stat-row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Total Revenue</div>
+            <div class="value text-primary" id="stat-revenue">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Active Customers</div>
+            <div class="value" id="stat-customers">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Payment Recovery</div>
+            <div class="value text-success" id="stat-recovery">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="label">Nearing Expiry (7d)</div>
+            <div class="value text-warning" id="stat-expiry">—</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card-pulse">
+            <span class="tag">Monthly Revenue Trend</span>
+            <div style="height: 250px; position: relative;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-pulse">
+            <span class="tag">Plan-wise Subscribers</span>
+            <div style="height: 250px; position: relative;">
+                <canvas id="planChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-pulse">
+            <span class="tag">Renewal vs. Lapse Rate</span>
+            <div style="height: 250px; position: relative;">
+                <canvas id="renewalChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-pulse d-flex flex-column justify-content-center h-100">
+            <span class="tag">Staff &amp; Admin Users</span>
+            <h5 class="mt-2">Active Staff Directory</h5>
+            <div class="table-responsive mt-2">
+                <table class="table table-pulse align-middle mb-0">
+                    <thead>
+                        <tr><th>Name</th><th>Username</th><th>Role</th></tr>
+                    </thead>
+                    <tbody id="staff-table-body">
+                        <tr><td colspan="3" class="text-muted small">Loading staff accounts…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card-pulse">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <span class="tag">AI Usage Intelligence</span>
+                    <h5 class="mt-1 mb-0">Plan Upgrade &amp; Downgrade Recommendations</h5>
+                </div>
+            </div>
+            <p class="text-muted small mb-3">Analyzes average monthly data consumption against reference plan caps to maximize customer satisfaction and prevent churn.</p>
+            <div class="table-responsive">
+                <table class="table table-pulse align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Customer</th><th>Connection ID</th><th>Current Plan</th><th>Monthly Usage</th><th>AI Recommendation</th><th>Reasoning</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recommendation-body">
+                        <tr><td colspan="6" class="text-center text-muted py-4">Loading usage analytics…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+const CYAN = '#0EA5E9';
+const TEAL = '#10B981';
+const AMBER = '#F59E0B';
+const ROSE = '#EF4444';
+const NAVY = '#0F172A';
+
+// Distinct color palette for dynamic plan visual identification
+const PALETTE = [
+    '#0EA5E9', // Sky Cyan
+    '#10B981', // Emerald Teal
+    '#F59E0B', // Amber Orange
+    '#8B5CF6', // Vivid Purple / Violet
+    '#EC4899', // Hot Pink
+    '#F97316', // Bright Orange
+    '#06B6D4', // Deep Cyan
+    '#6366F1', // Indigo
+    '#14B8A6', // Dark Teal
+    '#3B82F6'  // Bright Blue
+];
+
+function getDistinctColors(count) {
+    if (count <= PALETTE.length) {
+        return PALETTE.slice(0, count);
+    }
+    const colors = [...PALETTE];
+    for (let i = PALETTE.length; i < count; i++) {
+        const hue = (i * 137.508) % 360;
+        colors.push(`hsl(${hue}, 80%, 55%)`);
+    }
+    return colors;
+}
+
+async function loadDashboard() {
+    const summary = await fetch('/api/summary').then(r => r.json());
+    document.getElementById('stat-revenue').textContent = '₹' + summary.total_revenue.toLocaleString();
+    document.getElementById('stat-customers').textContent = summary.total_customers;
+    document.getElementById('stat-recovery').textContent = summary.recovery_rate + '%';
+    document.getElementById('stat-expiry').textContent = summary.nearing_expiry;
+
+    const revenue = await fetch('/api/revenue_trend').then(r => r.json());
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels: revenue.labels,
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: revenue.values,
+                backgroundColor: CYAN,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    const plans = await fetch('/api/plan_distribution').then(r => r.json());
+    const dynamicPlanColors = getDistinctColors(plans.labels.length);
+
+    new Chart(document.getElementById('planChart'), {
+        type: 'doughnut',
+        data: {
+            labels: plans.labels,
+            datasets: [{
+                data: plans.values,
+                backgroundColor: dynamicPlanColors,
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: { family: 'Plus Jakarta Sans', size: 12 }
+                    }
+                }
+            }
+        }
+    });
+
+    const renewal = await fetch('/api/renewal_rate').then(r => r.json());
+    new Chart(document.getElementById('renewalChart'), {
+        type: 'pie',
+        data: {
+            labels: renewal.labels,
+            datasets: [{
+                data: renewal.values,
+                backgroundColor: [TEAL, ROSE],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: { family: 'Plus Jakarta Sans', size: 12 }
+                    }
+                }
+            }
+        }
+    });
+
+    const staffList = await fetch('/api/staff_list').then(r => r.json());
+    const staffBody = document.getElementById('staff-table-body');
+    if (staffList.length === 0) {
+        staffBody.innerHTML = '<tr><td colspan="3" class="text-muted small">No staff accounts found.</td></tr>';
+    } else {
+        staffBody.innerHTML = staffList.map(s => `
+            <tr>
+                <td class="fw-semibold">${s.display_name}</td>
+                <td><code>${s.username}</code></td>
+                <td><span class="role-pill">${s.role}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    const recs = await fetch('/api/plan_recommendations').then(r => r.json());
+    const body = document.getElementById('recommendation-body');
+    if (recs.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No customer data available yet.</td></tr>';
+    } else {
+        body.innerHTML = recs.map(r => {
+            let badgeClass = 'badge-success-pulse';
+            let label = r.recommendation;
+            if (r.recommendation === 'Upgrade') { badgeClass = 'badge-warn-pulse'; label = 'Upgrade → ' + r.suggested_plan; }
+            if (r.recommendation === 'Downgrade') { badgeClass = 'badge-fail-pulse'; label = 'Downgrade → ' + r.suggested_plan; }
+            if (r.recommendation === 'No change') { label = 'Right-sized'; }
+            return `<tr>
+                <td class="fw-semibold">${r.customer}</td>
+                <td><code>${r.connection_id}</code></td>
+                <td>${r.current_plan}</td>
+                <td class="fw-semibold">${r.monthly_usage_gb} GB</td>
+                <td><span class="${badgeClass}">${label}</span></td>
+                <td class="text-muted small">${r.reason}</td>
+            </tr>`;
+        }).join('');
+    }
+}
+
+loadDashboard();
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NetPulse — Broadband Intelligence{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navpulse">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <span class="brand-mark">●</span> NetPulse
+            </a>
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <div class="navbar-nav ms-auto flex-row align-items-center gap-3">
+                    {% if current_user.role == 'customer' %}
+                        <a class="nav-link" href="{{ url_for('customer_view', customer_id=session.get('customer_id')) }}">My Subscription</a>
+                    {% elif current_user.role == 'staff' %}
+                        <a class="nav-link" href="{{ url_for('expiry_list') }}">Follow-up Queue</a>
+                        <a class="nav-link" href="{{ url_for('customer_lookup') }}">Customer Lookup</a>
+                    {% elif current_user.role == 'admin' %}
+                        <a class="nav-link" href="{{ url_for('expiry_list') }}">Follow-ups</a>
+                        <a class="nav-link" href="{{ url_for('customer_lookup') }}">Customers</a>
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                    {% endif %}
+
+                    {% if current_user.role %}
+                        <span class="nav-user ms-2">
+                            👤 {{ current_user.display_name }} 
+                            <span class="role-pill">{{ current_user.role }}</span>
+                        </span>
+                        <a class="nav-link text-danger-hover" href="{{ url_for('logout') }}">Sign Out</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container text-center py-4 mt-5 border-top text-muted small">
+        &copy; 2026 NetPulse Broadband Communications Inc. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
